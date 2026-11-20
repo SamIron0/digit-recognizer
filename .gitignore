@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Secrets
+.env
+.env.*
+
+# Jupyter and local experiments
+.ipynb_checkpoints/
+notebooks/.ipynb_checkpoints/
+
+# Training artifacts. The saved model models/digit_cnn.keras stays tracked.
+checkpoints/
+logs/
+runs/
+wandb/
+mlruns/
+*.ckpt
+
+# OS and editors
+.DS_Store
+Icon?
+.idea/
+.vscode/
+*.swp
