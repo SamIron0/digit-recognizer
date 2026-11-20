@@ -1,0 +1,5 @@
+# Work package 1 — Repo and project setup
+# Owner: teammate assigned to this package.
+# Replace this placeholder with pinned dependencies.
+# Libraries named in the PRD: TensorFlow/Keras, scikit-learn, NumPy,
+# FastAPI, Uvicorn, Pillow, Matplotlib, pytest.

@@ -1,0 +1,4 @@
+# Work package 5 writes models/digit_cnn.keras here.
+# Input shape (1, 28, 28, 1), float32 in 0-1, white digit on black background.
+# Output: 10 probabilities.
+# Do not commit a hand-made stand-in for that file.
