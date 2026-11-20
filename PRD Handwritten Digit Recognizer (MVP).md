@@ -1,8 +1,8 @@
 # PRD: Handwritten Digit Recognizer (MVP)
 
-**Team size:** 11 contributors&#32;
+**Team size:** 11 contributors 
 
-1\. Overview
+1 Overview
 
 We are building the simplest possible working handwritten digit recognizer: a user draws a digit (0-9) on a web canvas, clicks **Predict**, and sees the model's guess with a confidence score.
 
@@ -87,9 +87,9 @@ There are **11 work packages for 11 people**, each with a clear deliverable. Siz
 
 People whose package depends on another can start immediately by working against the **interface contracts**:
 
-- \#8 builds the API with a dummy model that returns a fixed prediction, then swaps in the real model.
-- \#10 builds against a mocked API response.
-- \#7 tests preprocessing on sample images with no model required.
+- 8 builds the API with a dummy model that returns a fixed prediction, then swaps in the real model.
+- 10 builds against a mocked API response.
+- 7 tests preprocessing on sample images with no model required.
 
 ## 8. Fair Contribution Policy
 
@@ -204,5 +204,3 @@ digit-recognizer/
 
 - **Branch naming:** `feature/<package-number>-<short-name>`, for example `feature/07-preprocessing`
 - **PRs:** small, linked to an issue, reviewed by at least one person other than the author before merging
-- **Communication:** one team chat channel
-- **Decisions:** changes to interface contracts are discussed in the channel and recorded in this PRD
