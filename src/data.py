@@ -21,12 +21,12 @@ def normalize(image):
 def fake_data(n = 100):
     """Dummy data for testing while the main dataset is being prepered"""
     x_train = np.random.rand(n, 28, 28, 1).astype("float32")
-    x_val = np.random.rand(n // 10, 28, 28, 1).astype("float32")
-    x_test = np.random.rand(n // 10, 28, 28, 1).astype("float32")
+    x_val = np.random.rand(n, 28, 28, 1).astype("float32")
+    x_test = np.random.rand(n, 28, 28, 1).astype("float32")
 
     y_train = np.random.randint(0, 10, n)
-    y_val = np.random.randint(0, 10, n // 10)
-    y_test = np.random.randint(0, 10, n // 10)
+    y_val = np.random.randint(0, 10, n)
+    y_test = np.random.randint(0, 10, n)
     return (x_train, y_train), (x_val, y_val), (x_test, y_test)
 
 if __name__ == "__main__":
