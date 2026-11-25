@@ -16,7 +16,7 @@ def load_mnist():
 
 def normalize(image):
     """Scale pixel values from 0-255 to 0-1."""
-    return image / 255.0
+    return (image / 255.0).astype("float32")
 
 def reshape(image):
     """Reshape data"""
@@ -56,4 +56,6 @@ if __name__ == "__main__":
     print (y_train.shape)
     print (y_test.shape)
     print (y_val.shape)
+
+    print(x_train.dtype, x_train.max())
     
