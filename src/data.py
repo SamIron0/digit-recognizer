@@ -18,6 +18,9 @@ def normalize(image):
     """Scale pixel values from 0-255 to 0-1."""
     return image / 255.0
 
+def reshape(image):
+    return image.reshape(-1, 28, 28, 1)
+
 def fake_data(n = 100):
     """Dummy data for testing while the main dataset is being prepered"""
     x_train = np.random.rand(n, 28, 28, 1).astype("float32")
@@ -30,6 +33,6 @@ def fake_data(n = 100):
     return (x_train, y_train), (x_val, y_val), (x_test, y_test)
 
 if __name__ == "__main__":
-    (x_train, y_train), (x_val, y_val), (x_test, y_test) = fake_data()
-    print(x_train.shape, x_val.shape, x_test.shape)
-    print(y_train.shape, y_val.shape, y_test.shape)
+    (x_train, y_train), (x_test, y_test) = load_mnist()
+    test = reshape(x_test)
+    print(test.shape)
