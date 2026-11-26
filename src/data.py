@@ -16,7 +16,25 @@ def load_mnist():
 
 def normalize(image):
     """Scale pixel values from 0-255 to 0-1."""
-    return image / 255.0
+    return (image / 255.0).astype("float32")
+
+def reshape(image):
+    """Reshape data"""
+    return image.reshape(-1, 28, 28, 1)
+
+def load_data():
+    """Load data, reshape and normalize data"""
+    (x_train, y_train), (x_test, y_test) = load_mnist()
+    x_train = reshape(normalize(x_train))
+    x_test = reshape(normalize(x_test))
+
+    x_val = x_train[54000:]
+    y_val = y_train[54000:]
+    x_train = x_train[:54000]
+    y_train = y_train[:54000]
+    
+    
+    return (x_train, y_train), (x_val, y_val), (x_test, y_test)
 
 def fake_data(n = 100):
     """Dummy data for testing while the main dataset is being prepered"""
@@ -30,6 +48,14 @@ def fake_data(n = 100):
     return (x_train, y_train), (x_val, y_val), (x_test, y_test)
 
 if __name__ == "__main__":
-    (x_train, y_train), (x_val, y_val), (x_test, y_test) = fake_data()
-    print(x_train.shape, x_val.shape, x_test.shape)
-    print(y_train.shape, y_val.shape, y_test.shape)
+    (x_train, y_train), (x_val, y_val), (x_test, y_test) = load_data()
+    print (x_train.shape)
+    print (x_test.shape)
+    print (x_val.shape)
+
+    print (y_train.shape)
+    print (y_test.shape)
+    print (y_val.shape)
+
+    print(x_train.dtype, x_train.max())
+    
