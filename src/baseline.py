@@ -8,9 +8,6 @@ Depends on: package 2.
 Replace this placeholder with the implementation.
 """
 
-"""Baseline models for MNIST: logistic regression and a dense network."""
-
-
 import json
 import time
 from pathlib import Path
@@ -25,7 +22,7 @@ from sklearn.metrics import (
     confusion_matrix,
 )
 
-from src.data import load_mnist
+from src.data import fake_data
 
 
 # Our project directories
@@ -74,9 +71,9 @@ def evaluate_model(model, x, y):
 
 
 def main():
-    (x_train, y_train), (x_val, y_val), (x_test, y_test) = load_mnist()
+    # (x_train, y_train), (x_val, y_val), (x_test, y_test) = load_mnsit()
+    (x_train, y_train), (x_val, y_val), (x_test, y_test) = fake_data()
 
-    # Training
     start = time.time()
     model = train_logistic_regression(x_train, y_train)
     train_time = time.time() - start
@@ -89,7 +86,6 @@ def main():
     MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
     joblib.dump(model, MODEL_PATH)
 
-    # Save confusion matrix
     CONFUSION_PATH.parent.mkdir(parents=True, exist_ok=True)
     np.savetxt(
         CONFUSION_PATH,
@@ -98,7 +94,6 @@ def main():
         fmt="%d"
     )
 
-    # Save evaluation results
     results = {
         "model": "logistic_regression",
         "validation_accuracy": val_results["accuracy"],
