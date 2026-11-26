@@ -3,9 +3,10 @@ Work package 2 — Data pipeline
 Owner: Okoro Ebubechukwu Prince 24/0253.
 
 Deliverable: load MNIST, normalize, reshape, and create a 90/10 train/validation split.
-Depends on: package 1 (tensorflow).
+Depends on: package 1.
 
 """
+from keras.datasets import mnist #import the mnist dataset
 import numpy as np
 
 def load_mnist():
