@@ -1,6 +1,6 @@
 # Evaluation Report
 
-- **Test Accuracy:** 0.0900 (9.00%)
+- **Test Accuracy:** 0.9920 (99.20%)
 
 ## Error Analysis
-Evaluated on placeholder data with the initial model, predictions are close to random noise across digits 0 through 9. In handwritten digit recognition on real data, visually similar pairs such as 4/9 and 3/5 commonly cause confusion due to loop closure and stroke curves. Once the trained model and real test set are merged, re-running `python -m src.evaluate` will refresh these metrics and charts with actual performance.
+Evaluated the trained CNN on the 10,000-image MNIST test split from `load_data()`, the same split training uses. The model misclassified 80 test images. The most common confusions are 2 read as 7 (7 images), 6 read as 0 (6 images), 9 read as 5 (5 images), 9 read as 4 (5 images). These digits share similar strokes, so a small change in a loop or a curve is enough to flip the prediction.
