@@ -1,23 +1,21 @@
 # Handwritten Digit Recognizer
 
-A local web application for recognizing handwritten digits from 0 to 9. The MVP goal is to draw a digit, send it to a FastAPI backend, and show the predicted digit with a confidence score.
+A local web app that recognizes handwritten digits from 0 to 9. Draw a digit on the canvas, click **Predict**, and read the predicted digit with a confidence score.
 
 The project follows the MVP design in [PRD Handwritten Digit Recognizer (MVP).md](PRD%20Handwritten%20Digit%20Recognizer%20%28MVP%29.md).
 
-This README matches the branch as it is today. You can load MNIST, start the API, draw with the mouse, and run the sample-evaluation script. `preprocess()` is still a placeholder, training still uses stand-in random data, and the web page does not send drawings to the API yet.
+## Features
 
-## What runs today
-
-1. **MNIST data pipeline** (`src/data.py`) — Loads MNIST, scales pixels to float32 values in 0–1, reshapes images to `(28, 28, 1)`, and returns 54,000 training, 6,000 validation, and 10,000 test images.
-2. **Baseline model** (`src/baseline.py`) — Logistic regression. `python -m src.baseline` fits stand-in random data and writes `docs/baseline_results.json`.
-3. **CNN model** (`src/model.py`) — Keras CNN with two convolution layers, two pooling layers, dropout, and a 10-class softmax output.
-4. **Model training** (`src/train.py`) — Fits that CNN for one epoch on stand-in random data and saves `models/digit_cnn.keras`. The file is already in the repo. Accuracy stays near 10% until training calls `load_data()`.
-5. **Model evaluation** (`src/evaluate.py`) — Scores the stand-in model on random data and writes `docs/evaluation.md`, `docs/confusion_matrix.png`, and `docs/misclassified.png`. The checked-in report is 9.00% and is not MNIST accuracy.
-6. **Image preprocessing** (`src/preprocess.py`) — Placeholder. The module does not define `preprocess()` yet. The API uses a stub that returns a blank `(1, 28, 28, 1)` tensor for every image.
-7. **Prediction API** (`api/main.py`) — FastAPI `GET /health` and `POST /predict`. Loads `models/digit_cnn.keras` once at startup, validates the image payload, and returns 10 class probabilities. With the stub preprocess, those probabilities are not a reading of the picture you sent.
-8. **Drawing canvas** (`web/index.html`, `web/canvas.js`) — A 400×400 canvas, black mouse strokes, and a Clear button. Touch drawing is not implemented. The PRD canvas size is 280×280.
-9. **Frontend prediction** (`web/app.js`) — Placeholder, and `index.html` does not load it. Predict stores a PNG data URL in a local variable. The page has no digit, confidence, loading, or error display.
-10. **Team handwriting QA** — 66 labeled photos in `samples/`, named `<digit>_<person>_1.jpeg`, plus `tests/real_samples_eval.py` and the checklist in `docs/test_plan.md`.
+1. **MNIST data pipeline** — Loads MNIST, scales pixels to float32 values in 0–1, reshapes images to `(28, 28, 1)`, and returns 54,000 training, 6,000 validation, and 10,000 test images.
+2. **Baseline model** — Logistic regression on the same data, as a comparison point for the CNN (about 92% test accuracy).
+3. **CNN model** — Two convolution layers, two pooling layers, dropout, and a 10-class softmax output.
+4. **Training** — Trains the CNN on MNIST with early stopping and saves `models/digit_cnn.keras`. Target test accuracy is at least 98%.
+5. **Evaluation** — Writes test accuracy, a confusion matrix, and a grid of misclassified digits under `docs/`.
+6. **Preprocessing** — Turns a drawn or uploaded image into MNIST format: grayscale, inverted to white-on-black, cropped, scaled so the long side is 20 pixels, centered by center of mass in a 28×28 canvas, and returned as `(1, 28, 28, 1)` float32 in 0–1. A blank image raises `ValueError`.
+7. **Prediction API** — FastAPI `GET /health` and `POST /predict`. The model loads once at startup. A prediction returns the digit, confidence, and 10 class probabilities.
+8. **Drawing canvas** — 280×280 canvas, black ink on a white background, mouse and touch drawing, and a Clear button.
+9. **Frontend prediction** — Exports the canvas as a PNG, calls `/predict`, and shows the digit, confidence as a percentage, a loading state, an unsure state when confidence is below 0.5, and a readable error if the request fails.
+10. **Team handwriting QA** — 66 labeled photos in `samples/`, plus `tests/real_samples_eval.py`. The release target is at least 80% accuracy on these photos.
 
 ## Project Structure
 
@@ -26,49 +24,49 @@ digit-recognizer/
 ├── api/main.py                 # FastAPI /health and /predict
 ├── docs/
 │   ├── test_plan.md            # QA checklist
-│   ├── evaluation.md           # Stand-in evaluation report (9.00%)
-│   ├── confusion_matrix.png    # Confusion matrix from stand-in data
-│   └── misclassified.png       # Misclassified grid from stand-in data
-├── models/digit_cnn.keras      # CNN trained on stand-in random data
-├── samples/                    # 66 team handwriting JPEGs
+│   ├── evaluation.md           # MNIST evaluation write-up
+│   ├── confusion_matrix.png    # Confusion matrix
+│   └── misclassified.png       # Grid of misclassified digits
+├── models/digit_cnn.keras      # Trained CNN
+├── samples/                    # 66 team handwriting images
 ├── src/
-│   ├── data.py                 # MNIST loading, normalize, reshape, split
-│   ├── baseline.py             # Logistic regression on stand-in data
+│   ├── data.py                 # MNIST load, normalize, reshape, split
+│   ├── baseline.py             # Logistic regression baseline
 │   ├── model.py                # CNN architecture
-│   ├── train.py                # Stand-in training run
-│   ├── evaluate.py             # Stand-in accuracy report
-│   └── preprocess.py           # Placeholder until preprocess() lands
+│   ├── train.py                # Training script
+│   ├── evaluate.py             # Accuracy and error analysis
+│   └── preprocess.py           # Canvas image to MNIST tensor
 ├── tests/
-│   ├── real_samples_eval.py    # Scores samples/ through the API path
-│   ├── test_api.py             # Backend API tests
-│   └── test_preprocess.py      # Placeholder, no tests yet
+│   ├── real_samples_eval.py    # Accuracy on samples/
+│   ├── test_api.py             # API tests
+│   └── test_preprocess.py      # Preprocessing tests
 └── web/
-    ├── index.html              # 400×400 canvas page
-    ├── style.css               # Placeholder, not linked from the page
-    ├── canvas.js               # Mouse drawing and Clear
-    └── app.js                  # Placeholder, not loaded by the page
+    ├── index.html              # Page
+    ├── style.css               # Styles
+    ├── canvas.js               # Mouse and touch drawing
+    └── app.js                  # Predict flow
 ```
 
 ## Requirements
 
-- Python 3.10, 3.11, or 3.12. `tensorflow==2.16.2` does not install on Python 3.13.
+- Python 3.10, 3.11, or 3.12 (`tensorflow==2.16.2` does not install on Python 3.13)
 - Git
 - A terminal
 - A modern browser
-- Internet access for cloning the repo and for the first MNIST download
+- Internet access for the clone and the first MNIST download
 
-Installing TensorFlow is the slow step. On a clean machine, `pip install -r requirements.txt` can take several minutes.
+The first `pip install` and the first training run are the slow steps.
 
 ## Setup
 
-### 1. Clone the Repository
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/SamIron0/digit-recognizer.git
 cd digit-recognizer
 ```
 
-### 2. Create a Virtual Environment and Install Dependencies
+### 2. Create a virtual environment and install dependencies
 
 #### Windows PowerShell
 
@@ -78,8 +76,6 @@ py -3.12 -m venv .venv
 python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
-
-If `py -3.12` is not available, install Python 3.12 and try again. `py -3` is unsafe here when it points at Python 3.13.
 
 If PowerShell blocks script activation:
 
@@ -97,9 +93,9 @@ python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-If `python3.12` is not on your `PATH`, use the `python3` binary only after `python3 --version` prints 3.10, 3.11, or 3.12.
+Use `python3.10` or `python3.11` instead when that is the interpreter you have. Check with `python3 --version` before creating the environment.
 
-## Load and Prepare the Data
+## Check the data
 
 From the repository root:
 
@@ -107,7 +103,7 @@ From the repository root:
 python -c "from src.data import load_data; (xt,_),(xv,_),(xs,_)=load_data(); print(xt.shape, xv.shape, xs.shape)"
 ```
 
-The result should contain:
+Expected shapes:
 
 - Training images: `(54000, 28, 28, 1)`
 - Validation images: `(6000, 28, 28, 1)`
@@ -115,35 +111,29 @@ The result should contain:
 
 The first run downloads MNIST.
 
-## Train the Model
-
-`models/digit_cnn.keras` is already in the repo. To replace it with a fresh stand-in run:
+## Train the model
 
 ```bash
 python -m src.train
 ```
 
-The script calls `fake_data()`, trains for one epoch, and overwrites `models/digit_cnn.keras`. Real MNIST training is required for the 98% MVP target.
+This trains on MNIST, uses early stopping, and writes `models/digit_cnn.keras`. Test accuracy should be at least 98%.
 
-`python -m src.model` saves an untrained CNN to that same path. Run `python -m src.train` afterward if you used that command.
-
-## Evaluate the Model
+## Evaluate the model
 
 ```bash
 python -m src.evaluate
 ```
 
-This needs `models/digit_cnn.keras` and regenerates:
+This regenerates:
 
 - `docs/confusion_matrix.png`
 - `docs/misclassified.png`
 - `docs/evaluation.md`
 
-The script evaluates stand-in random images. The report it writes is not the model's MNIST accuracy. The copy currently in the repo says 9.00%.
-
 ## Run the API
 
-From the repository root:
+From the repository root, in one terminal:
 
 ```bash
 uvicorn api.main:app --reload
@@ -154,23 +144,19 @@ The API listens at `http://localhost:8000`.
 - Swagger UI: `http://localhost:8000/docs`
 - Health check: `http://localhost:8000/health`
 
-### Health Check
+### Health check
 
 ```bash
 curl http://localhost:8000/health
 ```
 
-With the checked-in model file and the current placeholder preprocess module, the response is:
-
 ```json
 {
   "status": "ok",
   "model_loaded": true,
-  "preprocess": "stub"
+  "preprocess": "real"
 }
 ```
-
-`model_loaded` is true because `models/digit_cnn.keras` loaded. That file was trained on random stand-in data. `preprocess` stays `"stub"` until `src/preprocess.py` defines `preprocess()`. If the model file is missing or TensorFlow cannot load it, `model_loaded` is false and the API uses a dummy model that always returns digit 7 with confidence 0.973.
 
 ### Prediction
 
@@ -182,35 +168,23 @@ $body = @{ image = $base64 } | ConvertTo-Json
 Invoke-RestMethod -Uri "http://localhost:8000/predict" -Method Post -ContentType "application/json" -Body $body
 ```
 
-The body may be raw base64 or a canvas data URL (`data:image/png;base64,...`).
+The `image` field accepts raw base64 or a canvas data URL (`data:image/png;base64,...`).
 
-A successful response has this shape:
+Example response:
 
 ```json
 {
   "digit": 7,
-  "confidence": 0.973,
-  "probabilities": [0.003, 0.003, 0.003, 0.003, 0.003, 0.003, 0.003, 0.973, 0.003, 0.003]
+  "confidence": 0.97,
+  "probabilities": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.97, 0.0, 0.0]
 }
 ```
 
-Those exact numbers are the dummy model, used only when `models/digit_cnn.keras` does not load. A loaded stand-in CNN returns the same three fields with different numbers. While `preprocess` is `"stub"`, every image is replaced with a blank tensor before prediction, so the digit is not a reading of the PNG.
+An empty body, invalid base64, non-image bytes, and a blank canvas return `{"error": "message"}` with a 4xx status. A missing or mistyped `image` field returns 422.
 
-These inputs return `{"error": "..."}` with status 400:
+## Run the web page
 
-- an empty string
-- invalid base64
-- bytes that are not an image
-
-A missing `image` field, a non-string `image`, or invalid JSON returns status 422.
-
-A blank or all-white image currently returns 200. The preprocess stub does not reject it. When `preprocess()` raises `ValueError`, the API returns 400 and uses that message as `error`.
-
-## Run the Web Page
-
-The page is a drawing canvas. Predict does not call the API, so the API does not need to be running for this step.
-
-From the repository root:
+Keep the API running. In a second terminal, from the repository root:
 
 ```bash
 cd web
@@ -219,64 +193,55 @@ python -m http.server 5500
 
 Open `http://localhost:5500`.
 
-- Draw with the mouse. Strokes are black. The canvas is 400×400.
-- **Clear** erases the canvas.
-- **Predict** stores a PNG data URL in a local variable and leaves the page unchanged.
+1. Draw one digit with the mouse or a touch device. Ink is black on a white 280×280 canvas.
+2. Click **Predict**.
+3. Read the digit and the confidence percentage.
+4. Click **Clear** and try another digit.
 
-`web/style.css` is a placeholder and the page does not link it. `web/app.js` is a placeholder and the page does not load it. Touch drawing is not implemented.
+The page calls `http://localhost:8000`. The API allows cross-origin requests from the page.
 
-The API already allows cross-origin requests (`allow_origins=["*"]`) for when the page starts posting drawings to `http://localhost:8000/predict`.
+## Tests and handwriting accuracy
 
-## Run Tests and the Sample Script
-
-API tests, from the repository root:
+From the repository root:
 
 ```bash
-python -m pytest tests/test_api.py -v
+python -m pytest tests/test_api.py tests/test_preprocess.py -v
 ```
-
-`tests/test_api.py` checks `/health`, valid PNGs, canvas data URLs, transparent PNGs, CORS, malformed input, and the 400 response used when preprocess raises `ValueError` for a blank canvas. That blank-canvas case is simulated inside the test. The live stub returns 200 for a blank image.
-
-`tests/test_preprocess.py` is still a placeholder and contains no tests.
-
-Sample script, also from the repository root:
 
 ```bash
 python -m tests.real_samples_eval
 ```
 
-The script lists image files directly under `samples/`, reads the label from the first character of each filename, and runs `decode_image`, `load_preprocess`, and `load_model` from `api/main.py`.
+The sample script reads every image directly under `samples/`, takes the label from the first character of the filename, and runs the same preprocess and predict path as the API. It prints per-digit accuracy and overall accuracy. The release bar is at least 80%.
 
-While preprocess is the stub, every photo becomes the same blank tensor, so the table is a wiring check. If the Keras file fails to load, the dummy model predicts 7 for every file. Seven of the 66 photos are labeled 7, so that run prints 10.61% (7/66). Use an accuracy of at least 80% as the MVP sample gate only after `preprocess()` exists and the CNN has been trained on MNIST.
+The API tests cover `/health`, valid PNGs, canvas data URLs, transparent PNGs, CORS, malformed input, and a blank canvas.
 
-## Real-Handwriting Samples
+## Handwriting samples
 
-The 66 photos are files in `samples/`, one digit per file:
+Team photos live in `samples/`, one digit per file:
 
 ```text
 samples/<digit>_<person>_1.jpeg
 ```
 
-Example: `samples/7_king_1.jpeg` is a photo of the digit 7.
+Example: `samples/7_king_1.jpeg` is a photo of the digit 7. There are 66 images, covering digits 0 through 9.
 
-Every digit from 0 through 9 is present. Four person/digit pairs are absent: `0_chisom`, `4_declan`, `6_declan`, and `8_declan`.
+The manual checklist for drawing, prediction, edge cases, and a fresh clone is [docs/test_plan.md](docs/test_plan.md).
 
-The QA checklist is [docs/test_plan.md](docs/test_plan.md).
-
-PRD release targets, still ahead of this branch:
+Release targets:
 
 - at least 98% accuracy on the MNIST test set
 - at least 80% accuracy on these 66 photos
+- a fresh clone runs from this README in under 10 minutes
 
 ## Troubleshooting
 
-- **`python` is not recognized (Windows):** Use `py -3.12` instead of `python`.
-- **TensorFlow or another package fails to install:** Use Python 3.10, 3.11, or 3.12, and activate the virtual environment before `pip install`. Python 3.13 cannot install `tensorflow==2.16.2`.
-- **`/health` reports `model_loaded: false`:** The API is on the dummy model and will return digit 7. Put `models/digit_cnn.keras` back, or run `python -m src.train` from the repository root.
-- **`/health` reports `preprocess: "stub"`:** Expected on this branch. `src/preprocess.py` does not define `preprocess()` yet.
-- **MNIST download fails:** Retry with internet access. After one successful download, Keras reuses the cache.
-- **The web page shows no prediction:** Expected on this branch. `web/app.js` is not loaded. Confirm the API itself with `curl http://localhost:8000/health`.
-- **`/predict` returns 400:** The body was empty, not valid base64, or not an image. A blank drawing still returns 200 until `preprocess()` rejects it.
+- **`python` is not recognized (Windows):** Use `py -3.12` to create the virtual environment.
+- **TensorFlow fails to install:** Use Python 3.10, 3.11, or 3.12, and activate the virtual environment before `pip install`. Python 3.13 cannot install `tensorflow==2.16.2`.
+- **The API cannot load the model:** Run `python -m src.train` from the repository root so `models/digit_cnn.keras` exists, then start `uvicorn` again.
+- **MNIST download fails:** Retry with internet access. Later runs reuse the Keras cache.
+- **The page cannot reach the API:** Keep FastAPI on port 8000 and the page server on port 5500.
+- **A blank canvas returns an error:** Draw a digit in dark ink on the white canvas, then predict again.
 
 ## API Contract
 
@@ -287,4 +252,4 @@ PRD release targets, still ahead of this branch:
 | Request body | `{"image": "<base64 PNG string>"}` |
 | Success response | `{"digit": 7, "confidence": 0.97, "probabilities": [10 float values]}` |
 | Error response | `{"error": "message"}` |
-| Model input | `(1, 28, 28, 1)`, float32, values from 0 to 1 |
+| Model input | `(1, 28, 28, 1)`, float32, values from 0 to 1, white digit on black |
