@@ -1,6 +1,6 @@
 # Evaluation Report
 
-- **Test Accuracy:** 0.1400 (14.00%)
+- **Test Accuracy:** 0.9920 (99.20%)
 
 ## Error Analysis
-Evaluated on the current placeholder dataset (`fake_data()`), the model predicts digit `8` for the vast majority of samples across all true classes, with a few `7`s predicted as `2` and occasional `1`s/`2`s predicted as `2` or `5`s as `3`. Once the real test dataset replaces `fake_data()`, re-running `python -m src.evaluate` will refresh these metrics and charts with real handwritten digit performance.
+Evaluated the trained CNN on the 10,000-image MNIST test split from `load_data()`, the same split training uses. The model misclassified 80 test images. The most common confusions are 2 read as 7 (7 images), 6 read as 0 (6 images), 9 read as 5 (5 images), 9 read as 4 (5 images). These digits share similar strokes, so a small change in a loop or a curve is enough to flip the prediction.

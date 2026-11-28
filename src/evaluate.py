@@ -4,16 +4,52 @@ import numpy as np
 from keras.models import load_model
 from sklearn.metrics import confusion_matrix
 
-from src.data import fake_data
+from src.data import load_data
+
+
+def _confused_pairs(cm, limit=4):
+    """Return the most common true/predicted pairs, highest count first."""
+    pairs = []
+    for true_label in range(cm.shape[0]):
+        for pred_label in range(cm.shape[1]):
+            count = int(cm[true_label, pred_label])
+            if true_label != pred_label and count > 0:
+                pairs.append((count, int(true_label), int(pred_label)))
+    pairs.sort(reverse=True)
+    return pairs[:limit]
+
+
+def _error_analysis(cm):
+    """Describe the digit pairs the model actually mixes up on this run."""
+    pairs = _confused_pairs(cm)
+    total_errors = int(cm.sum() - np.trace(cm))
+    if not pairs:
+        return (
+            "Evaluated the trained CNN on the MNIST test split from `load_data()`. "
+            "The model made no mistakes on this split.\n"
+        )
+
+    named = ", ".join(
+        f"{true_label} read as {pred_label} ({count} images)"
+        for count, true_label, pred_label in pairs
+    )
+    return (
+        "Evaluated the trained CNN on the 10,000-image MNIST test split from "
+        "`load_data()`, the same split training uses. "
+        f"The model misclassified {total_errors} test images. "
+        f"The most common confusions are {named}. "
+        "These digits share similar strokes, so a small change in a loop or a curve "
+        "is enough to flip the prediction.\n"
+    )
 
 
 def main():
     docs_dir = Path("docs")
     docs_dir.mkdir(parents=True, exist_ok=True)
 
-    # 1. Load placeholder model and dummy test data
+    # 1. Load the trained model and the MNIST test split
     model = load_model("models/digit_cnn.keras")
-    _, _, (x_test, y_test) = fake_data()
+    _, _, (x_test, y_test) = load_data()
 
     # 2. Predict digit probabilities and convert to predicted class (0-9)
     probs = model.predict(x_test, verbose=0)
@@ -53,11 +89,7 @@ def main():
         "# Evaluation Report\n\n"
         f"- **Test Accuracy:** {accuracy:.4f} ({accuracy * 100:.2f}%)\n\n"
         "## Error Analysis\n"
-        "Evaluated on placeholder data with the initial model, predictions are close to random noise "
-        "across digits 0 through 9. In handwritten digit recognition on real data, visually similar "
-        "pairs such as 4/9 and 3/5 commonly cause confusion due to loop closure and stroke curves. "
-        "Once the trained model and real test set are merged, re-running `python -m src.evaluate` will "
-        "refresh these metrics and charts with actual performance.\n"
+        f"{_error_analysis(cm)}"
     )
     (docs_dir / "evaluation.md").write_text(report, encoding="utf-8")
     print(f"Done. Accuracy: {accuracy:.4f}. Files saved to {docs_dir}/")
